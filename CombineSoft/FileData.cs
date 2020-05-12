@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace CombineSoft
 {
 	public class FileData
 	{
-		public FileData(string[] file)
+		public FileData(string filePath, string[] file)
 		{
+			FilePath = filePath;
 			Populate(file);
 		}
 
+		public string FilePath { get; }
 		public string FileName { get; set; }
 		public DateTime StartDate { get; set; }
 		public TimeSpan StartTime { get; set; }
@@ -34,112 +37,133 @@ namespace CombineSoft
 		public string Gender { get; private set; }
 		public int RatNumber { get; private set; }
 
-		public void Populate(string[] file)
+		public string ErrorMessage { get; private set; }
+		public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+		void Populate(string[] file)
 		{
-			string startDate = string.Empty, endDate = string.Empty, startTime = string.Empty, endTime = string.Empty;
-
-			foreach (var item in file)
+			try
 			{
-				var line = item.Split(new[] { ':' }, 2);
-				if (line.Length >= 2)
+				if (FilePath.Contains("25F"))
 				{
-					var line1 = line[1].TrimStart();
+				}
+				string startDate = string.Empty, endDate = string.Empty, startTime = string.Empty, endTime = string.Empty;
 
-					switch (line[0].ToUpper())
+				foreach (var item in file)
+				{
+					var line = item.Split(new[] { ':' }, 2);
+					if (line.Length >= 2)
 					{
-						case "FILE":
-							FileName = line1;
-							break;
-						case "START DATE":
-							startDate = line1.Trim();
-							break;
-						case "END DATE":
-							endDate = line1.Trim();
-							break;
-						case "SUBJECT":
-							Subject = line1;
-							Gender = Regex.Replace(line1, @"[\d-]", string.Empty);
-							if (int.TryParse(Regex.Replace(line1, "[^0-9.]", string.Empty), out var ratNumber))
-							{
-								RatNumber = ratNumber;
-							}
-							break;
-						case "EXPERIMENT":
-							Experiment = line1;
-							break;
-						case "GROUP":
-							Group = line1;
-							break;
-						case "BOX":
-							Box = int.Parse(line1);
-							break;
-						case "MSN":
-							Msn = line1;
-							break;
-						case "START TIME":
-							startTime = line1.Trim();
-							break;
-						case "END TIME":
-							endTime = line1.Trim();
-							break;
-						case "A":
-							Active = double.Parse(line1.Trim());
-							break;
-						case "B":
-							Inactive = double.Parse(line1.Trim());
-							break;
-						case "C":
-							Infusions = double.Parse(line1.Trim());
-							break;
-						case "D":
-							TotalActivity = double.Parse(line1.Trim());
-							break;
-						case "N":
-							TotalTime = double.Parse(line1.Trim());
-							break;
-						case "R":
-							Activity1 = double.Parse(line1.Trim());
-							break;
-						case "S":
-							Activity2 = double.Parse(line1.Trim());
-							break;
-						case "T":
-							Activity3 = double.Parse(line1.Trim());
-							break;
-						case "U":
-							Activity4 = double.Parse(line1.Trim());
-							break;
-					}
+						var line1 = line[1].TrimStart();
 
-					if (line[0] == "Z")
-					{
-						break;
+						switch (line[0].ToUpper())
+						{
+							case "FILE":
+								FileName = line1;
+								break;
+							case "START DATE":
+								startDate = line1.Trim();
+								break;
+							case "END DATE":
+								endDate = line1.Trim();
+								break;
+							case "SUBJECT":
+								Subject = line1;
+								Gender = Regex.Replace(line1, @"[\d-]", string.Empty);
+								if (int.TryParse(Regex.Replace(line1, "[^0-9.]", string.Empty), out var ratNumber))
+								{
+									RatNumber = ratNumber;
+								}
+								break;
+							case "EXPERIMENT":
+								Experiment = line1;
+								break;
+							case "GROUP":
+								Group = line1;
+								break;
+							case "BOX":
+								Box = int.Parse(line1);
+								break;
+							case "MSN":
+								Msn = line1;
+								break;
+							case "START TIME":
+								startTime = line1.Trim();
+								break;
+							case "END TIME":
+								endTime = line1.Trim();
+								break;
+							case "A":
+								Active = double.Parse(line1.Trim());
+								break;
+							case "B":
+								Inactive = double.Parse(line1.Trim());
+								break;
+							case "C":
+								Infusions = double.Parse(line1.Trim());
+								break;
+							case "D":
+								TotalActivity = double.Parse(line1.Trim());
+								break;
+							case "N":
+								TotalTime = double.Parse(line1.Trim());
+								break;
+							case "R":
+								Activity1 = double.Parse(line1.Trim());
+								break;
+							case "S":
+								Activity2 = double.Parse(line1.Trim());
+								break;
+							case "T":
+								Activity3 = double.Parse(line1.Trim());
+								break;
+							case "U":
+								Activity4 = double.Parse(line1.Trim());
+								break;
+						}
+
+						if (line[0] == "Z")
+						{
+							break;
+						}
 					}
 				}
-			}
-			
-			if (!string.IsNullOrEmpty(startDate))
-			{
-				var date = startDate.Split('/');
-				StartDate = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
-			}
 
-			if (!string.IsNullOrEmpty(startTime))
-			{
-				var time = startTime.Split(':');
-				StartTime = new TimeSpan(int.Parse(time[0]), int.Parse(time[1]), int.Parse(time[2]));
-			}
+				if (!string.IsNullOrEmpty(startDate))
+				{
+					var date = startDate.Split('/');
+					StartDate = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
+				}
 
-			if (!string.IsNullOrEmpty(endDate))
-			{
-				var date = endDate.Split('/');
-				EndDate = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
-			}
+				if (!string.IsNullOrEmpty(startTime))
+				{
+					var time = startTime.Split(':');
+					StartTime = new TimeSpan(int.Parse(time[0]), int.Parse(time[1]), int.Parse(time[2]));
+				}
 
-			if (!string.IsNullOrEmpty(endTime))
+				if (!string.IsNullOrEmpty(endDate))
+				{
+					var date = endDate.Split('/');
+					EndDate = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
+				}
+
+				if (!string.IsNullOrEmpty(endTime))
+				{
+					var time = endTime.Split(':');
+					EndTime = new TimeSpan(int.Parse(time[0]), int.Parse(time[1]), int.Parse(time[2]));
+				}
+
+				if(string.IsNullOrEmpty(FileName) && string.IsNullOrEmpty(startDate) && string.IsNullOrEmpty(endDate) &&
+					string.IsNullOrEmpty(Subject) && string.IsNullOrEmpty(Gender) && string.IsNullOrEmpty(Group) &&
+					string.IsNullOrEmpty(Experiment))
+				{
+					ErrorMessage = FilePath;
+				}
+			}
+			catch
 			{
-				var time = endTime.Split(':');
-				EndTime = new TimeSpan(int.Parse(time[0]), int.Parse(time[1]), int.Parse(time[2]));
+				ErrorMessage =  FilePath;
+				return;
 			}
 		}
 	}

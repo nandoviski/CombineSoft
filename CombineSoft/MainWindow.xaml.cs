@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -32,11 +33,24 @@ namespace CombineSoft
 			if (SelectedFiles?.Length > 0)
 			{
 				var allFiles = new List<FileData>();
-
+				var errors = new StringBuilder();
 				foreach (var item in SelectedFiles)
 				{
 					var file = File.ReadAllLines(item);
-					allFiles.Add(new FileData(file));
+					var fileData = new FileData(item, file);
+					if (!fileData.HasError)
+					{
+						allFiles.Add(fileData);
+					}
+					else
+					{
+						errors.AppendLine(fileData.ErrorMessage);
+					}
+				}
+
+				if (!string.IsNullOrEmpty(errors.ToString()))
+				{
+					MessageBox.Show("Some files couldn't be processed:\n\n" + errors.ToString(), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				}
 
 				this.dataGrid1.ItemsSource = allFiles;
