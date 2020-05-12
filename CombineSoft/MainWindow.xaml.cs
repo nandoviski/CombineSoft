@@ -77,5 +77,42 @@ namespace CombineSoft
 				txtFilePath.Text = saveFileDialog1.FileName;
 			}
 		}
+
+		void TimeCourseExtractor_Click(object sender, RoutedEventArgs e)
+		{
+			if (SelectedFiles?.Length > 0)
+			{
+				var allFiles = new List<TimeCourseExtractor>();
+				var errors = new StringBuilder();
+				foreach (var item in SelectedFiles)
+				{
+					var file = File.ReadAllLines(item);
+					var fileData = new TimeCourseExtractor(item, file);
+					if (!fileData.HasError)
+					{
+						allFiles.Add(fileData);
+					}
+					else
+					{
+						errors.AppendLine(fileData.ErrorMessage);
+					}
+				}
+
+				if (!string.IsNullOrEmpty(errors.ToString()))
+				{
+					MessageBox.Show("Some files couldn't be processed:\n\n" + errors.ToString(), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
+
+				var result = new TimeCourseExtractorExcelUtil().CreateExcel(allFiles, txtFilePath.Text);
+				if (result)
+				{
+					var msgResult = MessageBox.Show("Excel created on '" + txtFilePath.Text + "'\nDo you wish to open?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
+					if (msgResult == MessageBoxResult.Yes)
+					{
+						Process.Start(txtFilePath.Text);
+					}
+				}
+			}
+		}
 	}
 }
