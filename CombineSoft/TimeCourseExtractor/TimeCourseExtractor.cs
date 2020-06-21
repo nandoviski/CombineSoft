@@ -165,7 +165,7 @@ namespace CombineSoft
 
 				foreach (var item in TimeCountPerAction)
 				{
-					if (!item.IsTotalMatch)
+					if (!item.IsTotalMatch && item.Action != "H")
 					{
 						ErrorMessage = $"{FilePath}\n\nTotal of column the {item.Action} don't match with the expected value";
 					}

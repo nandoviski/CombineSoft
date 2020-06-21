@@ -88,19 +88,20 @@ namespace CombineSoft
 				{
 					var file = File.ReadAllLines(item);
 					var fileData = new TimeCourseExtractor(item, file);
-					if (!fileData.HasError)
-					{
-						allFiles.Add(fileData);
-					}
-					else
+
+					if (fileData.HasError)
 					{
 						errors.AppendLine(fileData.ErrorMessage);
 					}
+					//else
+					//{
+						allFiles.Add(fileData);
+					//}
 				}
 
 				if (!string.IsNullOrEmpty(errors.ToString()))
 				{
-					MessageBox.Show("Some files couldn't be processed:\n\n" + errors.ToString(), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+					MessageBox.Show("Some files with issues:\n\n" + errors.ToString(), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				}
 
 				var result = new TimeCourseExtractorExcelUtil().CreateExcel(allFiles, txtFilePath.Text);
